@@ -38,6 +38,9 @@ contract MockRouter {
     address public immutable WETH = address(0xE7);
     uint public lastDeadline;
     address[] public lastPath;
+    uint public shortBy; // how much less than it reports the router delivers
+
+    function setShortBy(uint amount) external { shortBy = amount; }
 
     receive() external payable {}
 
@@ -47,7 +50,7 @@ contract MockRouter {
         require(out >= minOut, "router: insufficient output");
         lastDeadline = deadline;
         lastPath = path;
-        TestToken(path[1]).mint(to, out);
+        TestToken(path[1]).mint(to, out - shortBy);
         amounts = new uint[](2);
         amounts[0] = msg.value;
         amounts[1] = out;
@@ -92,6 +95,20 @@ contract ProxySwapTest is Test {
         vm.expectRevert("router is required");
         new DAppProxySwap(address(0));
         assertEq(swap.wrappedNative(), router.WETH());
+    }
+
+    function test_SwapInRefusesLessThanTheMinimumEvenWhenTheRouterReportsMore() public {
+        router.setShortBy(1);
+        vm.prank(alice);
+        vm.expectRevert("received less than the minimum");
+        swap.SwapIn{value: 1 ether}(address(token), 2 ether, deadline());
+    }
+
+    function test_SwapInReportsWhatActuallyArrived() public {
+        router.setShortBy(1);
+        vm.prank(alice);
+        uint out = swap.SwapIn{value: 1 ether}(address(token), 1 ether, deadline());
+        assertEq(out, 2 ether - 1);
     }
 
     function test_SwapInPaysTheCaller() public {

@@ -35,8 +35,12 @@ contract DAppProxySwap is ReentrancyGuard{
     /// @notice Swap the XDC sent with this call for _token, delivered to the caller
     function SwapIn(address _token,uint _minOut,uint _deadline)public payable nonReentrant protectedSwap(_minOut,_deadline) returns(uint){
         require(msg.value > 0, "XDC is required");
-        uint[] memory amounts = router.swapExactETHForTokens{value: msg.value}(_minOut,pathFor(wrappedNative,_token),msg.sender,_deadline);
-        uint out = amounts[amounts.length-1];
+        IERC20 token = IERC20(_token);
+        uint before = token.balanceOf(msg.sender);
+        router.swapExactETHForTokens{value: msg.value}(_minOut,pathFor(wrappedNative,_token),msg.sender,_deadline);
+        //What arrived is what counts, because a token can take a fee on the way
+        uint out = token.balanceOf(msg.sender) - before;
+        require(out >= _minOut, "received less than the minimum");
         emit Swapped(msg.sender,_token,true,msg.value,out);
         return out;
     }

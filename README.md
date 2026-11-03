@@ -34,7 +34,7 @@ flowchart LR
 
 What protects the caller:
 
-- **Slippage.** You choose `minOut`, and zero is refused. Work it out off-chain from a price you trust.
+- **Slippage.** You choose `minOut`, and zero is refused. Work it out off-chain from a price you trust. `SwapIn` checks the amount that reached your address, not the figure the router reports.
 - **Expiry.** You choose `deadline`, so a stuck transaction cannot run much later at a worse price.
 - **No caller-chosen router or path.** The router cannot be swapped for a malicious one in the call, and the path is always directly between the token and wrapped XDC.
 - **Your funds only.** The contract moves tokens only from the caller, and pays only the caller.
@@ -66,7 +66,7 @@ forge create contracts/proxySwap.sol:DAppProxySwap --rpc-url https://rpc.apothem
 
 ## What is tested
 
-[`test/foundry/ProxySwap.t.sol`](test/foundry/ProxySwap.t.sol) has 14 tests, including one fuzz test, and runs in CI on every push.
+[`test/foundry/ProxySwap.t.sol`](test/foundry/ProxySwap.t.sol) has 16 tests, including one fuzz test, and runs in CI on every push.
 
 | Tested | Not tested |
 | --- | --- |
@@ -83,6 +83,7 @@ Contracts already deployed are unaffected, though the earlier functions were all
 
 - `DAppProxySwap` was implemented, and its functions now take a minimum output and deadline.
 - The empty `GlobianceProxySwap`, `XSWAPProxySwap`, `SWIFTAllChainBridgeProxySwap`, `ImpelProxySwap` and `WanChainProxySwap` contracts were removed. Deploy `DAppProxySwap` with a compatible router for a DEX. The bridges and the planned choice between DEXes were never built, and are not built now.
+- `SwapIn` now measures what actually arrived, checks it against `minOut`, and reports that figure.
 - The unused Hardhat package files were removed.
 
 ## Known issues
