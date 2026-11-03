@@ -92,7 +92,7 @@ Contracts already deployed are unaffected, though the earlier functions were all
 | --- | --- |
 | Whoever deploys chooses the router | A deployment pointing at a malicious router could steal swaps. Only use a deployment whose router you have checked |
 | Only direct pairs | A token with no direct pool against wrapped XDC cannot be swapped |
-| Fee tokens are refused | Tokens that take a fee on transfer are not supported |
+| Fee tokens can be bought but not sold | `SwapOut` refuses tokens that take a fee on transfer. `SwapIn` can still buy one if what arrives meets `minOut`, and you then can't sell it back through this contract |
 | Tokens sent directly are stuck | There is no owner and no way to recover them |
 | Malicious tokens | Any token address can be passed. It can only affect the caller who chose it, but check it first |
 
