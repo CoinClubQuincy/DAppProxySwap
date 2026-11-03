@@ -60,7 +60,7 @@ To try it on a network, use the Apothem testnet:
 | XDC mainnet | 50 | `https://rpc.xinfin.network` |
 
 ```bash
-forge create contracts/proxySwap.sol:DAppProxySwap --rpc-url https://rpc.apothem.network --interactive --broadcast --legacy \\
+forge create contracts/proxySwap.sol:DAppProxySwap --rpc-url https://rpc.apothem.network --interactive --broadcast --legacy \
   --constructor-args 0xYourRouterAddress
 ```
 
